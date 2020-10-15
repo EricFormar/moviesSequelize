@@ -1,7 +1,9 @@
 
 const db = require('../database/models');
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize');
+const { validationResult } = require('express-validator');
 let Op = Sequelize.Op;
+const moment = require('moment')
 
 
 module.exports = {
@@ -20,6 +22,14 @@ module.exports = {
             res.send(peliculas)
         })
     },
+    all : function(req,res){
+        db.Peliculas.findAll()
+        .then( peliculas => {
+            res.render('movies',{
+                peliculas : peliculas
+            })
+        })
+    },
     detail : function(req,res){
         db.Peliculas.findOne({
             where : {
@@ -35,7 +45,11 @@ module.exports = {
             ]
         })
         .then( pelicula => {
-            res.send(pelicula)
+            res.render('moviesDetail',{
+                pelicula : pelicula,
+                genero : pelicula.genero,
+                actores : pelicula.actores
+            })
         })
     },
     new : function(req,res){
@@ -46,7 +60,9 @@ module.exports = {
             ]
         })
         .then( peliculas => {
-            res.send(peliculas)
+            res.render('moviesNew',{
+                peliculas : peliculas
+            })
         })
     },
     recommended : function(req,res){
@@ -58,7 +74,136 @@ module.exports = {
             }
         })
         .then( peliculas => {
-            res.send(peliculas)
+            res.render('moviesRecommended',{
+                peliculas : peliculas
+            })
+        })
+    },
+    search : function(req,res){
+        db.Peliculas.findAll({
+            where : {
+                title : {
+                    [Op.substring] : req.body.search
+                }
+            }
+        })
+        .then( peliculas => {
+            res.render('movies',{
+                peliculas : peliculas
+            })
+        })
+    },
+    create : function(req,res){
+        let generos = db.Generos.findAll({
+            order : [
+                ['name','ASC']
+            ]
+        });
+        let actores = db.Actores.findAll({
+            order : [
+                ['first_name','ASC']
+            ]
+        });
+        Promise.all([generos,actores])
+        .then(([generos,actores]) => {
+            res.render('moviesAdd',{
+                generos : generos,
+                actores : actores
+            })
+        })
+    },
+    save : function(req,res){
+        let errors = validationResult(req)
+        
+        if(errors.isEmpty()){
+            db.Peliculas.create({
+                title : req.body.title,
+                rating : req.body.rating,
+                awards : req.body.awards,
+                release_date : req.body.release_date,
+                length : req.body.length,
+                genre_id : req.body.genre
+            })
+            .then ( newPeli => {
+                if( typeof req.body.actores == 'string'){
+                    db.actor_movie.create({
+                        movie_id : newPeli.id,
+                        actor_id : req.body.actores
+                    })
+                    .then(()=>{
+                        return res.redirect('/movies')
+                    })
+                }else{
+                    req.body.actores.forEach( id =>{
+                        db.actor_movie.create({
+                            movie_id : newPeli.id,
+                            actor_id : id
+                        })
+                        .then(()=>{
+                            return res.redirect('/movies')
+                        })
+                    })
+                }
+            })
+            .catch(error => {
+                res.send(error)
+            })
+
+            
+        }else{
+            let generos = db.Generos.findAll({
+                order : [
+                    ['name','ASC']
+                ]
+            });
+            let actores = db.Actores.findAll({
+                order : [
+                    ['first_name','ASC']
+                ]
+            });
+            Promise.all([generos,actores])
+            .then(([generos,actores]) => {
+                res.render('moviesAdd',{
+                    generos : generos,
+                    actores : actores,
+                    old : req.body,
+                    errors : errors.mapped()
+                })
+            })
+        }
+    },
+    edit : function(req,res){
+        let pelicula = db.Peliculas.findOne({
+            where : {
+                id : req.params.id
+            },
+            include : [
+                {
+                    association : 'genero'
+                },
+                {
+                    association : 'actores'
+                }
+            ]
+        });
+        let generos = db.Generos.findAll({
+            order : [
+                ['name','ASC']
+            ]
+        });
+        let actores = db.Actores.findAll({
+            order : [
+                ['first_name','ASC']
+            ]
+        });
+        Promise.all([pelicula,generos,actores])
+        .then(([pelicula,generos,actores]) => {
+            res.render('moviesEdit',{
+                actores : actores,
+                generos : generos,
+                pelicula : pelicula,
+                estreno : moment(pelicula.release_date).format('YYYY-MM-DD')
+            })
         })
     }
 }
