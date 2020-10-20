@@ -36,7 +36,7 @@ module.exports = (sequelize, dataTypes) => {
         
         Genre.hasMany(models.Peliculas,{
             as : 'peliculas',
-            foreignKey : 'genre_id'
+            foreignKey : 'genre_id' // ESTA CLAVE SE ENCUENTRA EN LA TABLA PELICULAS
         })
 
     }

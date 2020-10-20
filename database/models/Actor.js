@@ -26,10 +26,7 @@ module.exports = (sequelize, dataTypes) => {
             type : dataTypes.INTEGER(10),
             defaultValue : null
         },
-        country : {
-            type : dataTypes.STRING(255),
-            defaultValue : null
-        }
+        
     }
 
     let config = {
@@ -43,16 +40,16 @@ module.exports = (sequelize, dataTypes) => {
     Actor.associate = function(models){
         
         Actor.belongsToMany(models.Peliculas,{
-            as : 'peliculas',
+            as : 'peliculas', 
             through : 'actor_movie',
-            foreignKey : 'actor_id',
-            otherKey : 'movie_id'
+            foreignKey : 'actor_id',//la clave foranea de este modelo en esa tabla intermedia
+            otherKey : 'movie_id'//la otra clave foranea del otro modelo en cuestion en esa tabla intermedia
         });
 
-        Actor.belongsTo(models.Peliculas,{
-            as : 'favorita',
-            foreignKey : 'favorite_movie_id'
-        })
+        //  Actor.hasOne(models.Peliculas,{
+        //      as : 'favorita',
+        //      foreignKey : 'favorite_movie_id'
+        //  })
 
     }
 

@@ -26,6 +26,6 @@ module.exports = (sequelize, dataTypes) => {
     }
 
     const actor_movie = sequelize.define(alias,cols,config);
-
+    
     return actor_movie
 }

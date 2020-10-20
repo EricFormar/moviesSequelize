@@ -93,6 +93,7 @@ module.exports = {
             })
         })
     },
+
     create : function(req,res){
         let generos = db.Generos.findAll({
             order : [
@@ -125,10 +126,10 @@ module.exports = {
                 genre_id : req.body.genre
             })
             .then ( newPeli => {
-                if( typeof req.body.actores == 'string'){
+                if( typeof req.body.actores == 'string'){// un solo actor
                     db.actor_movie.create({
                         movie_id : newPeli.id,
-                        actor_id : req.body.actores
+                        actor_id : req.body.actores.id
                     })
                     .then(()=>{
                         return res.redirect('/movies')
@@ -205,5 +206,57 @@ module.exports = {
                 estreno : moment(pelicula.release_date).format('YYYY-MM-DD')
             })
         })
-    }
+    },
+    processEdit:function(req, res, next){
+        db.Peliculas.update({
+                title : req.body.title,
+                rating : req.body.rating,
+                awards : req.body.awards,
+                release_date : req.body.release_date,
+                length : req.body.length,
+                genre_id : req.body.genre
+        },
+        {
+            where: {
+                id: req.params.id
+            }
+        })
+        .then(function(result) {
+           return res.redirect('/movies')
+        })
+    },
+    
+    delete:function(req, res){
+
+        let actor_movie = db.actor_movie.destroy({
+            where: {
+                movie_id: req.params.id
+            }
+        })
+        let favorite_movie = db.Actores.update({
+                favorite_movie_id : null
+            },
+            {
+            where:{
+                favorite_movie_id : req.params.id
+            }        
+        })
+        Promise.all([actor_movie,favorite_movie])
+        .then(result=>{
+            db.Peliculas.destroy({
+                where: {
+                    id: req.params.id
+                }
+            })
+            .then(result=>{
+                res.redirect('/movies')
+            })
+            
+        })
+        .catch(err=>{
+            res.send(err)
+        })
+            
+
+    },
 }

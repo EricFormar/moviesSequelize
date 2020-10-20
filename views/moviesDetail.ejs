@@ -9,10 +9,10 @@
           <div class="card p-3 m-5">
             <div class="card-body">
               <div class="d-flex justify-content-end">
-                <form action="/movies/delete/<%= pelicula.id %>?_method=delete" method="POST" >
+                <form action="/movies/delete/<%= pelicula.id %>?_method=delete" method="POST">
                 <button class="btn-sm btn-danger m-1"><i class="fas fa-trash-alt"></i></button>
                 </form>
-                <form action="/movies/edit/<%= pelicula.id %>" >
+                <form action="/movies/edit/<%= pelicula.id %>?_method=put" >
                   <button class="btn-sm btn-success m-1"><i class="fas fa-edit"></i></button>
                 </form>
               </div>
