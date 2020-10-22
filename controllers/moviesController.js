@@ -222,7 +222,34 @@ module.exports = {
             }
         })
         .then(function(result) {
-           return res.redirect('/movies')
+            
+            db.actor_movie.destroy({
+                where: {
+                    movie_id: req.params.id
+                }
+            })
+            .then(result=>{
+                if( typeof req.body.actores == 'string'){// un solo actor
+                    db.actor_movie.create({
+                        movie_id : req.params.id,
+                        actor_id : req.body.actors.id
+                    })
+                    .then(()=>{
+                        return res.redirect('/movies')
+                    })
+                }else{
+                    req.body.actors.forEach( id =>{
+                        db.actor_movie.create({
+                            movie_id : req.params.id,
+                            actor_id : id
+                        })
+                        .then(()=>{
+                            return res.redirect('/movies')
+                        })
+                    })
+                }
+            })
+           
         })
     },
     

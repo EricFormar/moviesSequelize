@@ -23,7 +23,7 @@ module.exports = (sequelize, dataTypes) => {
             defaultValue : null
         },
         favorite_movie_id : {
-            type : dataTypes.INTEGER(10),
+            type : dataTypes.INTEGER(10).UNSIGNED,
             defaultValue : null
         },
         
@@ -49,7 +49,7 @@ module.exports = (sequelize, dataTypes) => {
         //  Actor.hasOne(models.Peliculas,{
         //      as : 'favorita',
         //      foreignKey : 'favorite_movie_id'
-        //  })
+        //})
 
     }
 
